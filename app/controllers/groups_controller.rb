@@ -31,7 +31,6 @@ class GroupsController < ApplicationController
   end
 
   def update
-
     if @group.update(group_params)
        redirect_to groups_path, notice: "Update Success"
      else
@@ -40,10 +39,35 @@ class GroupsController < ApplicationController
   end
 
   def destroy
-
     @group.destroy
     flash[:alert] = "Group deleted"
     redirect_to groups_path
+  end
+
+  def join
+    @group = Group.find(params[:id])
+
+    if !current_user.is_member_of?(@group)
+      current_user.join!(@group)
+      flash[:notice] = "加入本论坛版成功！"
+    else
+      flash[:warning] = "你已是本论坛版成员！"
+    end
+
+    redirect_to group_path(@group)
+  end
+
+  def quit
+    @group = Group.find(params[:id])
+
+    if current_user.is_member_of?(@group)
+      current_user.quit!(@group)
+      flash[:alert ] = "你已退出本论坛版！"
+    else
+      flash[:warning] = "你不是本论坛版成员，怎么退出！"
+    end
+
+    redirect_to group_path(@group)
   end
 
   private
